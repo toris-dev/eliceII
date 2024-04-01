@@ -1,0 +1,7 @@
+{
+  "name": "eliceII",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://kdt-gitlab.elice.io/sw_track/class_08/web_project_ii/team02",
+  "license": "MIT"
+}
