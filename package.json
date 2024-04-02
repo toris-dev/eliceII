@@ -4,12 +4,15 @@
   "main": "index.js",
   "repository": "https://kdt-gitlab.elice.io/sw_track/class_08/web_project_ii/team02",
   "scripts": {
-    "dev": "nodemon --exec babel-node ./src/app.js --delay 2"
+    "dev": "nodemon --exec babel-node ./src/app.js --delay 2",
+    "build": "babel src -d dist",
+    "start": "node ./dist/app.js"
   },
   "license": "MIT",
   "dependencies": {
     "@babel/core": "^7.24.3",
     "@babel/node": "^7.23.9",
+    "axios": "^1.6.8",
     "body-parser": "^1.20.2",
     "core-js": "3",
     "cors": "^2.8.5",
