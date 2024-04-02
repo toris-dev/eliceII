@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import * as admin from 'firebase-admin';
-import { kakaoUrl } from '../../constant/kakao';
+import { kakaoUrl } from '../constant/kakao';
 import {
   getKakaoUser,
   getToken,
   updateOrCreateUser
-} from '../../service/kakaoAuth.service';
+} from '../service/kakaoAuth.service';
 
 export const userRouter = Router();
 
