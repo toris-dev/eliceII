@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { frontendUrl } from '../constant/url';
 import {
   getKakaoUser,
   getToken,
@@ -47,7 +48,8 @@ oauthRouter.get('/kakao', async (req, res) => {
 
     res.cookie('firebaseToken', firebaseToken, { httpOnly: true });
 
-    return res.redirect('http://localhost:5173/naver');
+    // 프론트 router 작성되면 redirect 위치 분기문 작성 예정
+    return res.redirect(frontendUrl);
   } catch (error) {
     res.status(404).json({ message: '로그인에 실패하였습니다.' });
     throw new Error(error);

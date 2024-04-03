@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { naverReqMeUrl, naverTokenUrl } from '../constant/url';
 import { auth } from '../utils/firebase';
 // https://nid.naver.com/oauth2.0/authorize GET/POST - 네이버 로그인 인증을 요청합니다.
 // https://nid.naver.com/oauth2.0/token GET/POST JSON 접근 토큰의 발급, 갱신, 삭제를 요청합니다.
@@ -13,10 +14,7 @@ export const getNaverToken = async (code) => {
     state: 'RAMDOM_STATE'
   };
 
-  const res = await axios.post(
-    'https://nid.naver.com/oauth2.0/token',
-    new URLSearchParams(body)
-  );
+  const res = await axios.post(naverTokenUrl, new URLSearchParams(body));
 
   console.log(res);
   return res;
@@ -24,8 +22,7 @@ export const getNaverToken = async (code) => {
 
 export const getNaverUser = async (token) => {
   console.log(token);
-  const res = await axios.get('https://openapi.naver.com/v1/nid/me', {
-    url: 'http://localhost:8080/api/oauth/naver',
+  const res = await axios.get(naverReqMeUrl, {
     headers: { Authorization: `Bearer ${token}` }
   });
   console.log(res);

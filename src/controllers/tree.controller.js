@@ -21,6 +21,7 @@ treeRouter.post('/add', verifyAuthToken, async (req, res) => {
         tree: treeSnapshot.docs[0].data()
       });
     }
+
     const treeRef = await db.collection('tree').add({
       uid,
       name,
@@ -28,6 +29,7 @@ treeRouter.post('/add', verifyAuthToken, async (req, res) => {
       treeImage: '',
       count: 0
     });
+
     const treeId = (await treeRef.get()).id;
     res.status(200).json({
       message: '트리가 생성되었습니다.',
