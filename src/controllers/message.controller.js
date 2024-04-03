@@ -42,7 +42,7 @@ messageRouter.post('/:treeId/write', async (req, res) => {
 
     res.status(200).json({
       message: '메시지 작성 완료',
-      questionId: messageId
+      messageId
     });
   } catch (error) {
     console.error('Error:', error);
@@ -76,7 +76,7 @@ messageRouter.delete(
 
       res.status(200).send({
         message: '메시지를 성공적으로 삭제하였습니다.',
-        question: messageDocSnapshot.data()
+        messageData: messageDocSnapshot.data()
       });
     } catch (error) {
       console.error('질문 삭제 도중 오류가 발생하였습니다.', error);
