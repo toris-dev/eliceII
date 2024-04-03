@@ -1,10 +1,10 @@
 import express from 'express';
-import { questionRouter } from './question.controller';
-import { questionnaireRouter } from './questionnaire.controller';
-import { userRouter } from './user.controller';
+import { messageRouter } from './message.controller';
+import { oauthRouter } from './oauth.controller';
+import { treeRouter } from './tree.controller';
 
 export const router = express.Router();
 
-router.use('/oauth', userRouter); // 소셜로그인에 대한 Router
-router.use('/questionnaire', questionnaireRouter); // 메시지에 대한 Router
-router.use('/question', questionRouter); // 질문지에 대한 Router
+router.use('/oauth', oauthRouter); // 소셜로그인에 대한 Router
+router.use('/message', messageRouter); // 트리에 대한 Router
+router.use('/tree', treeRouter);
