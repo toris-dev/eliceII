@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import jwt from 'jsonwebtoken';
 import { frontendUrl } from '../constant/url';
 import {
   getKakaoUser,
@@ -7,7 +8,7 @@ import {
 } from '../service/kakaoAuth.service';
 import { getNaverToken, getNaverUser } from '../service/naverAuth.service';
 import { userService } from '../service/user.service';
-import { auth, db } from '../utils/firebase';
+import { db } from '../utils/firebase';
 
 export const oauthRouter = Router();
 
@@ -28,31 +29,42 @@ oauthRouter.get('/kakao', async (req, res) => {
       .collection('users')
       .where('uid', '==', kakaoUser.id)
       .get();
+    let authUser;
+    try {
+      authUser = await updateOrCreateUser(kakaoUser, response.refresh_token);
+    } catch (updateOrCreateError) {
+      console.error('Error updating or creating user:', updateOrCreateError);
+      throw new Error('유저 업데이트 또는 생성 에러');
+    }
+    let accessToken;
+    // jwt 생성
+    try {
+      accessToken = jwt.sign({ uid: authUser.uid }, process.env.JWT_SCRET_KEY, {
+        expiresIn: '24h'
+      });
+    } catch (createTokenError) {
+      console.error('Error creating custom token:', createTokenError);
+      throw new Error('커스텀 토큰 생성 에러');
+    }
 
-    const authUser = await updateOrCreateUser(kakaoUser);
-    const firebaseToken = await auth.createCustomToken(authUser.uid, {
-      provider: 'oidc.kakao',
-      httpOnly: true
-    });
     if (userCheck.empty) {
       await userService.userCreate({
         uid: kakaoUser.id,
         name: kakaoUser.kakao_account.profile.nickname,
         email: kakaoUser.kakao_account.email,
-        // name, age 추후에 허가받은 후 진행
         question: [],
         messageCount: 0,
         refreshToken: response.refresh_token
       });
     }
 
-    res.cookie('firebaseToken', firebaseToken, { httpOnly: true });
-
-    // 프론트 router 작성되면 redirect 위치 분기문 작성 예정
-    return res.redirect(frontendUrl);
+    return res
+      .cookie('accessToken', accessToken, { httpOnly: true })
+      .cookie('kakaoToken', token)
+      .redirect(frontendUrl);
   } catch (error) {
-    res.status(404).json({ message: '로그인에 실패하였습니다.' });
-    throw new Error(error);
+    console.error('Error occurred:', error);
+    return res.status(500).json({ message: '로그인에 실패하였습니다.' });
   }
 });
 
