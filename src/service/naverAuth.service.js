@@ -16,16 +16,13 @@ export const getNaverToken = async (code) => {
 
   const res = await axios.post(naverTokenUrl, new URLSearchParams(body));
 
-  console.log(res);
   return res;
 };
 
 export const getNaverUser = async (token) => {
-  console.log(token);
   const res = await axios.get(naverReqMeUrl, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  console.log(res);
   return res.data;
 };
 export const updateOrCreateUser = async (user) => {

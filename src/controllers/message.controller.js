@@ -11,6 +11,7 @@ messageRouter.get('/:messageId', async (req, res) => {
     const messageRef = await db.collection('messages').doc(messageId).get();
 
     if (!messageRef.exists) {
+      console.error('메시지를 찾을 수 없습니다.');
       return res.status(404).send({ error: '메시지를 찾을 수 없습니다.' });
     }
 
@@ -26,9 +27,15 @@ messageRouter.get('/:messageId', async (req, res) => {
 messageRouter.post('/:treeId/write', async (req, res) => {
   try {
     const { treeId } = req.params;
-    if (!treeId) {
-      res.status(404).json({ message: '트리가 없습니다.' });
+
+    const docRef = db.collection('tree').doc(treeId);
+    const docSnapshot = await docRef.get();
+
+    if (!docSnapshot.exists) {
+      // 문서가 존재하는 경우
+      return res.status(404).json({ message: '트리가 존재하지 않습니다.' });
     }
+
     const { message, icon, coordinate, uid } = req.body;
     const messageRef = await db.collection('messages').add({
       treeId,
@@ -60,16 +67,20 @@ messageRouter.delete(
   verifyAuthToken,
   async (req, res) => {
     const { messageId } = req.params;
-
+    const { uid } = req.user;
     try {
       // questions 컬렉션에서 questionId로 문서 조회
       const messageDocSnapshot = await db
         .collection('messages')
         .doc(messageId)
         .get();
-
       if (!messageDocSnapshot.exists) {
-        return res.status(404).send({ error: '질문을 찾을 수 없습니다.' });
+        return res.status(404).json({ message: '질문을 찾을 수 없습니다.' });
+      }
+      if (messageDocSnapshot.data().uid !== uid) {
+        return res.status(404).json({
+          message: '호스트가 아닌 이용자는 삭제할 수 없습니다.'
+        });
       }
 
       await messageDocSnapshot.ref.delete();
@@ -80,7 +91,7 @@ messageRouter.delete(
       });
     } catch (error) {
       console.error('질문 삭제 도중 오류가 발생하였습니다.', error);
-      res.status(500).send({ error: '메시지를 삭제하지 못했습니다.' });
+      res.status(500).send({ message: '메시지를 삭제하지 못했습니다.' });
     }
   }
 );
@@ -95,14 +106,21 @@ messageRouter.get('/:treeId/all', async (req, res) => {
       .collection('messages')
       .where('treeId', '==', treeId)
       .get();
+    if (doc.empty) {
+      return res.status(404).json({ error: '메시지를 찾을 수 없습니다.' });
+    }
     doc.forEach((msg) => messages.push(msg.data()));
 
     res.json(messages);
   } catch (error) {
     console.error('Error:', error);
     if (error.code === 404) {
-      res.status(404).json({ error: '질문지를 찾을 수 없습니다.' });
+      return res
+        .status(404)
+        .json({ message: '메시지를 가져오지 못했습니다.', error });
     }
-    res.status(500).json({ error: '설문지, 질문을 가져오지 못했습니다.' });
+    return res
+      .status(500)
+      .json({ message: '메시지를 가져오지 못했습니다.', error });
   }
 });
