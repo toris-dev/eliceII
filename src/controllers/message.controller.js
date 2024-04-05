@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import verifyAuthToken from '../middleware/oauth.middleware';
-import { db } from '../utils/firebase';
+import { db, storage } from '../utils/firebase';
 
 export const messageRouter = Router();
 
@@ -95,6 +95,33 @@ messageRouter.delete(
     }
   }
 );
+
+// 모든 아이콘 보여주기
+messageRouter.get('/icon/all', async (req, res) => {
+  try {
+    const [files] = await storage.bucket().getFiles({
+      prefix: 'icons/'
+    });
+
+    const iconUrlsPromises = files.map((file) =>
+      file.getSignedUrl({
+        action: 'read',
+        expires: '03-17-2025' // 만료 시간
+      })
+    );
+
+    const iconUrlsArray = await Promise.all(iconUrlsPromises);
+    const flattenedUrls = iconUrlsArray
+      .flat()
+      .map((urlArr) => urlArr.toString());
+
+    res.status(200).json(flattenedUrls);
+  } catch (error) {
+    res.status(404).json({
+      message: `아이콘을 불러오지 못했습니다. error: ${error}`
+    });
+  }
+});
 
 // 트리 메시지 전체 받아오기 O
 messageRouter.get('/:treeId/all', async (req, res) => {
