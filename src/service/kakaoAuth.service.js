@@ -8,6 +8,7 @@ export const getToken = async (code) => {
       grant_type: 'authorization_code',
       client_id: process.env.KAKAO_CLIENT_ID,
       redirect_uri: process.env.KAKAO_REDIRECT_URI,
+      client_secret: process.env.KAKAO_SCRET_KEY,
       code
     };
 
@@ -25,19 +26,19 @@ export const getKakaoUser = async (token) => {
     const res = await axios.get(kakaoReqMeUrl, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    console.log(res);
     return res.data;
   } catch (error) {
     throw new Error('카카오 유저정보 요청 error: ', error);
   }
 };
-export const updateOrCreateUser = async (user) => {
+export const updateOrCreateUser = async (user, refreshToken) => {
   const kakaoAccount = user.kakao_account;
   const properties = {
     uid: `kakao:${user.id}`,
     provider: 'kakao',
     displayName: kakaoAccount?.profile?.nickname,
-    email: kakaoAccount?.email
+    email: kakaoAccount?.email,
+    refreshToken
   };
 
   try {

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import verifyAuthToken from '../middleware/oauth.middleware';
 import { db } from '../utils/firebase';
 
@@ -8,7 +9,6 @@ export const treeRouter = Router();
 treeRouter.post('/add', verifyAuthToken, async (req, res) => {
   try {
     const { uid, name } = req.user;
-
     // 트리가 존재한다면 return
     const treeSnapshot = await db
       .collection('tree')
@@ -21,9 +21,12 @@ treeRouter.post('/add', verifyAuthToken, async (req, res) => {
         tree: treeSnapshot.docs[0].data()
       });
     }
+    const id = uuidv4().replace(/-/g, '');
+    const treeRef = db.collection('tree').doc(id);
 
-    const treeRef = await db.collection('tree').add({
+    treeRef.add({
       uid,
+      id,
       name,
       created_at: new Date(),
       treeImage: '',
