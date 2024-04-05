@@ -102,7 +102,6 @@ messageRouter.get('/icon/all', async (req, res) => {
     const [files] = await storage.bucket().getFiles({
       prefix: 'icons/'
     });
-
     const iconUrlsPromises = files.map((file) =>
       file.getSignedUrl({
         action: 'read',
@@ -113,6 +112,7 @@ messageRouter.get('/icon/all', async (req, res) => {
     const iconUrlsArray = await Promise.all(iconUrlsPromises);
     const flattenedUrls = iconUrlsArray
       .flat()
+      .slice(1)
       .map((urlArr) => urlArr.toString());
 
     res.status(200).json(flattenedUrls);
