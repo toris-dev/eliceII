@@ -25,13 +25,16 @@ export const getNaverUser = async (token) => {
   });
   return res.data;
 };
-export const updateOrCreateUser = async (user) => {
-  const kakaoAccount = user.kakao_account;
+export const naverUpdateOrCreateUser = async (user, refreshToken) => {
+  if (!user) {
+    throw new Error('로그인하세요');
+  }
   const properties = {
     uid: `naver:${user.id}`,
     provider: 'naver',
-    displayName: kakaoAccount?.profile?.nickname ?? 'anonymous',
-    email: kakaoAccount?.email ?? 'example@example.com'
+    displayName: user?.name,
+    email: user?.email,
+    refreshToken
   };
 
   try {

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { kakaoReqMeUrl, kakaoTokenUrl } from '../constant/url';
 import { auth } from '../utils/firebase';
 
-export const getToken = async (code) => {
+export const getKakaoToken = async (code) => {
   try {
     const body = {
       grant_type: 'authorization_code',
@@ -31,7 +31,7 @@ export const getKakaoUser = async (token) => {
     throw new Error('카카오 유저정보 요청 error: ', error);
   }
 };
-export const updateOrCreateUser = async (user, refreshToken) => {
+export const kakaoUpdateOrCreateUser = async (user, refreshToken) => {
   const kakaoAccount = user.kakao_account;
   const properties = {
     uid: `kakao:${user.id}`,
