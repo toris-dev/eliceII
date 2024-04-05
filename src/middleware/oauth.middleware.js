@@ -12,7 +12,7 @@ const verifyAuthToken = async (req, res, next) => {
     const { uid } = verify(accessToken, process.env.JWT_SCRET_KEY);
     const user = await auth.getUser(uid);
     // 검증된 UID를 요청 객체에 추가
-    req.user = { uid: user.uid, name: user.name };
+    req.user = { uid: user.uid, name: user.displayName };
     next();
   } catch (error) {
     console.error('Error verifying auth token:', error);
