@@ -24,13 +24,12 @@ treeRouter.post('/add', verifyAuthToken, async (req, res) => {
     const id = uuidv4().replace(/-/g, '');
     const treeRef = db.collection('tree').doc(id);
 
-    treeRef.add({
+    treeRef.set({
+      treeId: id,
       uid,
-      id,
       name,
       created_at: new Date(),
-      treeImage: '',
-      count: 0
+      treeImage: ''
     });
 
     const treeId = (await treeRef.get()).id;

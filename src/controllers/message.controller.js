@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import firebase from 'firebase-admin';
 import verifyAuthToken from '../middleware/oauth.middleware';
 import { db, storage } from '../utils/firebase';
 
@@ -35,6 +36,7 @@ messageRouter.post('/:treeId/write', async (req, res) => {
       // 문서가 존재하는 경우
       return res.status(404).json({ message: '트리가 존재하지 않습니다.' });
     }
+    await docRef.update({ count: firebase.firestore.FieldValue.increment(1) });
 
     const { message, icon, coordinate, uid } = req.body;
     const messageRef = await db.collection('messages').add({
@@ -74,6 +76,9 @@ messageRouter.delete(
         .collection('messages')
         .doc(messageId)
         .get();
+      const { treeId } = messageDocSnapshot.data();
+      const docRef = db.collection('tree').doc(treeId);
+
       if (!messageDocSnapshot.exists) {
         return res.status(404).json({ message: '질문을 찾을 수 없습니다.' });
       }
@@ -85,9 +90,13 @@ messageRouter.delete(
 
       await messageDocSnapshot.ref.delete();
 
+      await docRef.update({
+        count: firebase.firestore.FieldValue.increment(-1)
+      });
+
       res.status(200).send({
         message: '메시지를 성공적으로 삭제하였습니다.',
-        messageData: messageDocSnapshot.data()
+        messageData: messageDocSnapshot.data().id
       });
     } catch (error) {
       console.error('질문 삭제 도중 오류가 발생하였습니다.', error);

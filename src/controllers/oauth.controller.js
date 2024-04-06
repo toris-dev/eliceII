@@ -52,16 +52,19 @@ oauthRouter.get('/kakao', async (req, res) => {
       }
     );
     // home 으로 redirect
-    if (userCheck) {
-      return res
-        .cookie('accessToken', accessToken, { httpOnly: true })
-        .cookie('kakaoToken', token)
-        .redirect(frontendUrl);
-    }
+    // if (userCheck) {
+    //   return res
+    //     .cookie('accessToken', accessToken, { httpOnly: true })
+    //     .cookie('kakaoToken', token, { httpOnly: true })
+    //     .redirect(frontendUrl);
+    // }
+    // console.log(accessToken);
+    // console.log(token);
+    // console.log('first');
     // 질문입력 redirect
     return res
       .cookie('accessToken', accessToken, { httpOnly: true })
-      .cookie('kakaoToken', token)
+      .cookie('kakaoToken', token, { httpOnly: true })
       .redirect(frontendUrl);
   } catch (error) {
     console.error('Error occurred:', error);
