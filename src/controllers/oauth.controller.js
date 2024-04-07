@@ -2,6 +2,7 @@ import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import { frontendUrl } from '../constant/url';
 
+import { jwtSecretKey } from '../constant/env';
 import {
   getKakaoToken,
   getKakaoUser,
@@ -44,13 +45,10 @@ oauthRouter.get('/kakao', async (req, res) => {
       throw new Error('유저 업데이트 또는 생성 에러');
     }
     // jwt 생성
-    const accessToken = jwt.sign(
-      { uid: authUser.uid },
-      process.env.JWT_SCRET_KEY,
-      {
-        expiresIn: '24h'
-      }
-    );
+    const accessToken = jwt.sign({ uid: authUser.uid }, jwtSecretKey, {
+      expiresIn: '24h'
+    });
+    console.log(userCheck);
     // home 으로 redirect
     // if (userCheck) {
     //   return res
@@ -95,13 +93,9 @@ oauthRouter.get('/naver', async (req, res) => {
       throw new Error(updateOrCreateError);
     }
 
-    const accessToken = jwt.sign(
-      { uid: authUser.uid },
-      process.env.JWT_SCRET_KEY,
-      {
-        expiresIn: '24h'
-      }
-    );
+    const accessToken = jwt.sign({ uid: authUser.uid }, jwtSecretKey, {
+      expiresIn: '24h'
+    });
     return res
       .cookie('accessToken', accessToken, { httpOnly: true })
       .cookie('naverToken', response.data.access_token)

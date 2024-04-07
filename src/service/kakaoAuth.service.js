@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { kakaoClientId, kakaoRedirectUri, kakaoSecret } from '../constant/env';
 import { kakaoReqMeUrl, kakaoTokenUrl } from '../constant/url';
 import { auth } from '../utils/firebase';
 
@@ -6,9 +7,9 @@ export const getKakaoToken = async (code) => {
   try {
     const body = {
       grant_type: 'authorization_code',
-      client_id: process.env.KAKAO_CLIENT_ID,
-      redirect_uri: process.env.KAKAO_REDIRECT_URI,
-      client_secret: process.env.KAKAO_SCRET_KEY,
+      client_id: kakaoClientId,
+      redirect_uri: kakaoRedirectUri,
+      client_secret: kakaoSecret,
       code
     };
 
@@ -62,7 +63,7 @@ export async function refreshAccessToken(refreshToken) {
 
     const params = new URLSearchParams();
     params.append('grant_type', 'refresh_token');
-    params.append('client_id', process.env.KAKAO_CLIENT_ID);
+    params.append('client_id', kakaoClientId);
     params.append('refresh_token', refreshToken);
 
     const response = await axios.post(kakaoTokenUrl, params, config);

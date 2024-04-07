@@ -1,10 +1,10 @@
 import admin from 'firebase-admin';
 import serviceAccount from '../../firebaseconfig.json';
-import '../dotenv';
+import { storeBucketName } from '../constant/env';
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: process.env.BUCKET_NAME
+  storageBucket: storeBucketName
 });
 export const db = admin.firestore();
 export const auth = admin.auth(admin);

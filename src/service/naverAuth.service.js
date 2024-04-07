@@ -1,4 +1,9 @@
 import axios from 'axios';
+import {
+  naverClientId,
+  naverRedirectUri,
+  naverSecretKey
+} from '../constant/env';
 import { naverReqMeUrl, naverTokenUrl } from '../constant/url';
 import { auth } from '../utils/firebase';
 // https://nid.naver.com/oauth2.0/authorize GET/POST - 네이버 로그인 인증을 요청합니다.
@@ -7,9 +12,9 @@ import { auth } from '../utils/firebase';
 export const getNaverToken = async (code) => {
   const body = {
     grant_type: 'authorization_code',
-    client_id: process.env.NAVER_CLIENT_ID,
-    client_secret: process.env.NAVER_SECRET_KEY,
-    redirect_uri: process.env.NAVER_REDIRECT_URI,
+    client_id: naverClientId,
+    client_secret: naverSecretKey,
+    redirect_uri: naverRedirectUri,
     code,
     state: 'RAMDOM_STATE'
   };
