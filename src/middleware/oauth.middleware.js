@@ -17,8 +17,7 @@ const verifyAuthToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Error verifying auth token:', error);
-    res.status(403).json({ message: 'Unauthorizesd' });
-    throw new Error(error);
+    return res.status(500).json({ message: 'Unauthorizesd' });
   }
 };
 export default verifyAuthToken;
