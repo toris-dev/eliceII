@@ -13,16 +13,22 @@ import {
   naverReqMeUrl,
   naverTokenUrl
 } from '../constant/url';
-import { auth } from '../utils/firebase';
+import { auth, db } from '../utils/firebase';
 
-export default class Auth {
+export default class OAuthService {
   /**
-   * @param {"naver" | "kakao"} provider
+   * 생성자
+   * @param {"naver" | "kakao"} provider - 제공자 (네이버 또는 카카오)
    */
   constructor(provider) {
     this.provider = provider;
   }
 
+  /**
+   * 액세스 토큰을 요청합니다.
+   * @param {string} code - 코드
+   * @returns {Promise<any>} 토큰 응답 데이터
+   */
   async getToken(code) {
     try {
       const body =
@@ -65,30 +71,48 @@ export default class Auth {
   }
 
   async updateOrCreateUser(user, refreshToken) {
-    const properties =
-      this.provider === 'kakao'
-        ? {
-            uid: `kakao:${user.id}`,
-            provider: 'kakao',
-            displayName: user.kakao_account?.profile?.nickname,
-            email: user.kakao_account?.email,
-            refreshToken
-          }
-        : {
-            uid: `naver:${user.id}`,
-            provider: 'naver',
-            displayName: user?.name,
-            email: user?.email,
-            refreshToken
-          };
-    try {
-      return await auth.updateUser(properties.uid, properties);
-    } catch (error) {
-      if (error.code === 'auth/user-not-found') {
-        return auth.createUser(properties);
-      }
-      throw error;
+    const properties = {
+      uid: `${this.provider}:${user.id}`,
+      provider: `oidc.${this.provider}`,
+      displayName:
+        user.kakao_account?.profile?.nickname ?? user?.name ?? 'null',
+      email: user.kakao_account?.email ?? user?.email ?? 'example@example.com',
+      created_at: new Date(),
+      refreshToken
+    };
+    const userRef = db.collection('users').doc(`${this.provider}:${user.id}`);
+
+    const existingUser = await auth.getUser(properties.uid);
+
+    // 유저가 있다면 update
+    if (existingUser) {
+      const [, authResult] = await Promise.all([
+        userRef.set(properties),
+        auth.updateUser(properties.uid, properties)
+      ]);
+      return authResult;
     }
+    // 유저가 없다면 create
+    const [, authResult] = await Promise.all([
+      userRef.set(properties),
+      auth.createUser(properties)
+    ]);
+    return authResult;
+  }
+
+  /**
+   * @param {string} uid 소셜로그인 uid값
+   * @returns {Promise<boolean>} 존재하지 않으면 false 존재하면 true
+   */
+  async userCheck(uid) {
+    const user = await db
+      .collection('users')
+      .where('uid', '==', `${this.provider}:${uid}`)
+      .get();
+    if (user.empty) {
+      return false;
+    }
+    return true;
   }
 
   // refreshAccessToken 관리를 어떻게?

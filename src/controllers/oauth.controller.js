@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
-import { frontendUrl } from '../constant/url';
-
 import { jwtSecretKey } from '../constant/env';
-import Auth from '../service/auth.service';
-import { db } from '../utils/firebase';
+import { frontendUrl } from '../constant/url';
+import OAuthService from '../service/oauth.service';
 
 export const oauthRouter = Router();
+
+const authKakao = new OAuthService('kakao');
+const authNaver = new OAuthService('naver');
 
 oauthRouter.get('/kakao', async (req, res) => {
   try {
@@ -17,17 +18,14 @@ oauthRouter.get('/kakao', async (req, res) => {
         message: 'code is a required parameter.'
       });
     }
-    const auth = new Auth('kakao');
-    const response = await auth.getToken(code);
+    const response = await authKakao.getToken(code);
     const token = response.access_token;
-    const kakaoUser = await auth.getUser(token);
-    const userCheck = await db
-      .collection('users')
-      .where('uid', '==', kakaoUser.id)
-      .get();
+    const kakaoUser = await authKakao.getUser(token);
+    const userCheck = await authKakao.userCheck(kakaoUser.id);
+
     let authUser;
     try {
-      authUser = await auth.updateOrCreateUser(
+      authUser = await authKakao.updateOrCreateUser(
         kakaoUser,
         response.refresh_token
       );
@@ -71,13 +69,13 @@ oauthRouter.get('/naver', async (req, res) => {
       });
     }
 
-    const auth = new Auth('naver');
-    const response = await auth.getToken(code); // 네이버 OAuth를 통해 액세스 토큰을 받아옴
-    const naverUser = await auth.getUser(response.access_token); // 액세스 토큰을 사용하여 네이버 사용자 정보를 가져옴
+    const response = await authNaver.getToken(code); // 네이버 OAuth를 통해 액세스 토큰을 받아옴
+    const naverUser = await authNaver.getUser(response.access_token); // 액세스 토큰을 사용하여 네이버 사용자 정보를 가져옴
+    const userCheck = await authNaver.userCheck(naverUser.id);
     // 이후에 필요한 처리를 수행하고 클라이언트에게 응답을 보냄
     let authUser;
     try {
-      authUser = await auth.updateOrCreateUser(
+      authUser = await authNaver.updateOrCreateUser(
         naverUser.response,
         response.refresh_token
       );
@@ -85,16 +83,16 @@ oauthRouter.get('/naver', async (req, res) => {
       console.error('Error updating or creating user:', updateOrCreateError);
       throw new Error(updateOrCreateError);
     }
-
     const accessToken = jwt.sign({ uid: authUser.uid }, jwtSecretKey, {
       expiresIn: '24h'
     });
+    console.log(userCheck);
     return res
       .cookie('accessToken', accessToken, { httpOnly: true })
       .cookie('naverToken', response.access_token)
       .redirect(frontendUrl);
   } catch (error) {
-    res.status(404).json({ message: '네이버 로그인에 실패하였습니다.' });
+    res.status(500).json({ message: '네이버 로그인에 실패하였습니다.' });
     throw new Error(error);
   }
 });
