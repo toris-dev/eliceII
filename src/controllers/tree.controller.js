@@ -1,46 +1,24 @@
 import { Router } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import verifyAuthToken from '../middleware/oauth.middleware';
-import { db } from '../utils/firebase';
+import TreeService from '../service/tree.service';
 
 export const treeRouter = Router();
-
+const treeService = new TreeService();
 // 트리 생성 , 기존에 트리가 있는지 검사 O
 treeRouter.post('/add', verifyAuthToken, async (req, res) => {
   try {
     const { uid, name } = req.user;
-    // 트리가 존재한다면 return
-    const treeSnapshot = await db
-      .collection('tree')
-      .where('uid', '==', uid)
-      .select('uid')
-      .get();
-    if (!treeSnapshot.empty) {
-      return res.status(401).json({
-        message: '트리가 존재합니다.',
-        tree: treeSnapshot.docs[0].data()
-      });
+    const treeRes = await treeService.createTree(uid, name);
+
+    if (treeRes.error) {
+      // 트리가 존재한다면 return
+      return res.status(404).json(treeRes);
     }
-    const id = uuidv4().replace(/-/g, '');
-    const treeRef = db.collection('tree').doc(id);
 
-    treeRef.set({
-      treeId: id,
-      uid,
-      name,
-      created_at: new Date(),
-      treeImage: ''
-    });
-
-    const treeId = (await treeRef.get()).id;
-    res.status(200).json({
-      message: '트리가 생성되었습니다.',
-      treeId
-    });
+    res.status(200).json(treeRes);
   } catch (error) {
-    res.status(404).json({
+    res.status(500).json({
       message: '트리가 생성되지 않았습니다.'
     });
-    throw new Error(error);
   }
 });
