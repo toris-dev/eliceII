@@ -3,16 +3,7 @@ import jwt from 'jsonwebtoken';
 import { frontendUrl } from '../constant/url';
 
 import { jwtSecretKey } from '../constant/env';
-import {
-  getKakaoToken,
-  getKakaoUser,
-  kakaoUpdateOrCreateUser
-} from '../service/kakaoAuth.service';
-import {
-  getNaverToken,
-  getNaverUser,
-  naverUpdateOrCreateUser
-} from '../service/naverAuth.service';
+import Auth from '../service/auth.service';
 import { db } from '../utils/firebase';
 
 export const oauthRouter = Router();
@@ -26,17 +17,17 @@ oauthRouter.get('/kakao', async (req, res) => {
         message: 'code is a required parameter.'
       });
     }
-
-    const response = await getKakaoToken(code);
+    const auth = new Auth('kakao');
+    const response = await auth.getToken(code);
     const token = response.access_token;
-    const kakaoUser = await getKakaoUser(token);
+    const kakaoUser = await auth.getUser(token);
     const userCheck = await db
       .collection('users')
       .where('uid', '==', kakaoUser.id)
       .get();
     let authUser;
     try {
-      authUser = await kakaoUpdateOrCreateUser(
+      authUser = await auth.updateOrCreateUser(
         kakaoUser,
         response.refresh_token
       );
@@ -79,12 +70,14 @@ oauthRouter.get('/naver', async (req, res) => {
         message: 'code is a required parameter.'
       });
     }
-    const response = await getNaverToken(code); // 네이버 OAuth를 통해 액세스 토큰을 받아옴
-    const naverUser = await getNaverUser(response.data.access_token); // 액세스 토큰을 사용하여 네이버 사용자 정보를 가져옴
+
+    const auth = new Auth('naver');
+    const response = await auth.getToken(code); // 네이버 OAuth를 통해 액세스 토큰을 받아옴
+    const naverUser = await auth.getUser(response.access_token); // 액세스 토큰을 사용하여 네이버 사용자 정보를 가져옴
     // 이후에 필요한 처리를 수행하고 클라이언트에게 응답을 보냄
     let authUser;
     try {
-      authUser = await naverUpdateOrCreateUser(
+      authUser = await auth.updateOrCreateUser(
         naverUser.response,
         response.refresh_token
       );
@@ -98,7 +91,7 @@ oauthRouter.get('/naver', async (req, res) => {
     });
     return res
       .cookie('accessToken', accessToken, { httpOnly: true })
-      .cookie('naverToken', response.data.access_token)
+      .cookie('naverToken', response.access_token)
       .redirect(frontendUrl);
   } catch (error) {
     res.status(404).json({ message: '네이버 로그인에 실패하였습니다.' });
