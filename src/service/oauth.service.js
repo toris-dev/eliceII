@@ -115,6 +115,22 @@ export default class OAuthService {
     return true;
   }
 
+  async userTreeFind(uid) {
+    try {
+      const snapshot = await db
+        .collection('tree')
+        .where('uid', '==', uid)
+        .get();
+      if (!snapshot.empty) {
+        return snapshot.docs[0].id; // 첫 번째 문서의 트리 ID 반환
+      }
+      // 트리가 없을 경우에 대한 처리 추가 가능
+      throw new Error('트리가 아직 존재하지 않습니다.');
+    } catch (error) {
+      console.error('Error finding user tree:', error);
+      throw new Error('사용자 트리를 찾는 중에 오류가 발생했습니다.');
+    }
+  }
   // refreshAccessToken 관리를 어떻게?
   // async refreshAccessToken(refreshToken) {
   //   try {

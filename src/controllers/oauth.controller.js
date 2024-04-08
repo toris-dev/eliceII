@@ -49,10 +49,17 @@ oauthRouter.get('/kakao', async (req, res) => {
     // console.log(token);
     // console.log('first');
     // 질문입력 redirect
+    // 질문 입력 여부에 따라 리디렉션할 경로 결정
+
+    // 사용자의 트리 ID를 가져옴
+    const treeId = await authKakao.userTreeFind(authUser.uid);
+
+    // 질문 입력 여부에 따라 리디렉션할 경로 결정
+    const redirectPath = userCheck ? `/host/tree/${treeId}` : '/host/question';
     return res
       .cookie('accessToken', accessToken, { httpOnly: true })
       .cookie('kakaoToken', token, { httpOnly: true })
-      .redirect(frontendUrl);
+      .redirect(frontendUrl + redirectPath);
   } catch (error) {
     console.error('Error occurred:', error);
     return res.status(500).json({ message: error });
