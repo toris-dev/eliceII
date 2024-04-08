@@ -4,9 +4,10 @@
   "main": "index.js",
   "repository": "https://kdt-gitlab.elice.io/sw_track/class_08/web_project_ii/team02",
   "scripts": {
-    "dev": "nodemon --exec babel-node ./src/app.js --delay 2",
+    "dev": "nodemon --exec babel-node ./src/app.js",
     "build": "babel src -d dist",
-    "start": "node ./dist/app.js"
+    "start": "node ./dist/app.js",
+    "deploy": "pm2 start ecosystem.config.js"
   },
   "license": "MIT",
   "dependencies": {
