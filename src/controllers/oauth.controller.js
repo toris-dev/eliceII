@@ -43,8 +43,8 @@ oauthRouter.get('/kakao', async (req, res) => {
     // 질문 입력 여부에 따라 리디렉션할 경로 결정
     const redirectPath = userCheck ? `/host/tree/${treeId}` : '/host/question';
     return res
-      .cookie('accessToken', accessToken, { httpOnly: true })
-      .cookie('kakaoToken', token, { httpOnly: true })
+      .cookie('accessToken', accessToken)
+      .cookie('kakaoToken', token)
       .redirect(frontendUrl + redirectPath);
   } catch (error) {
     console.error('Error occurred:', error);
@@ -84,8 +84,8 @@ oauthRouter.get('/naver', async (req, res) => {
     // 질문 입력 여부에 따라 리디렉션할 경로 결정
     const redirectPath = userCheck ? `/host/tree/${treeId}` : '/host/question';
     return res
-      .cookie('accessToken', accessToken, { httpOnly: true })
-      .cookie('naverToken', response.access_token, { httpOnly: true })
+      .cookie('accessToken', accessToken)
+      .cookie('naverToken', response.access_token)
       .redirect(frontendUrl + redirectPath);
   } catch (error) {
     res.status(500).json({ message: '네이버 로그인에 실패하였습니다.' });
