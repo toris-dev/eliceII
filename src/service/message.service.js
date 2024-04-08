@@ -66,7 +66,6 @@ export default class MessageService {
     if (!messageDocSnapshot.exists) {
       return { error: '해당 메시지가 없습니다.' };
     }
-    console.log(messageDocSnapshot.exists);
     const { treeId } = messageDocSnapshot.data();
     const docRef = db.collection('tree').doc(treeId);
     const tree = (await docRef.get()).data();
@@ -108,13 +107,36 @@ export default class MessageService {
   /**
    *
    * @param {string} treeId - 트리 고유번호(treeId)
-   * @returns {Promise<{treeId: string, coordinate: {x:number, y:number}, icon: string, created_at: Date, messaeg:string}[]|{error: string}>}
+   * @param {number} count - 페이지네이션 count
+   * @returns {Promise<{treeId: string, coordinate: {x:number, y:number}, icon: string, created_at: Date, message:string}[]|{error: string}>}
    */
-  async findAll(treeId) {
-    const doc = await db
+  async findAll(treeId, count) {
+    const pageSize = 11; // 한 페이지에 표시할 메시지 수
+    const startAfterDoc = (count - 1) * pageSize; // 시작점 계산
+
+    let query = db
       .collection('messages')
       .where('treeId', '==', treeId)
-      .get();
+      .orderBy('created_at', 'desc')
+      .limit(pageSize);
+
+    if (count > 1) {
+      const lastPageQuery = await db
+        .collection('messages')
+        .where('treeId', '==', treeId)
+        .orderBy('created_at', 'desc')
+        .limit(startAfterDoc)
+        .get();
+
+      if (lastPageQuery.empty) {
+        return { error: '메시지를 찾을 수 없습니다.' };
+      }
+
+      const lastVisible = lastPageQuery.docs[lastPageQuery.docs.length - 1];
+      query = query.startAfter(lastVisible); // start 문서기반
+    }
+
+    const doc = await query.get();
 
     if (doc.empty) {
       return { error: '메시지를 찾을 수 없습니다.' };
