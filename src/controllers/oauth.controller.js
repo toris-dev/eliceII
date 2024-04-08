@@ -37,21 +37,7 @@ oauthRouter.get('/kakao', async (req, res) => {
     const accessToken = jwt.sign({ uid: authUser.uid }, jwtSecretKey, {
       expiresIn: '24h'
     });
-    console.log(userCheck);
-    // home 으로 redirect
-    // if (userCheck) {
-    //   return res
-    //     .cookie('accessToken', accessToken, { httpOnly: true })
-    //     .cookie('kakaoToken', token, { httpOnly: true })
-    //     .redirect(frontendUrl);
-    // }
-    // console.log(accessToken);
-    // console.log(token);
-    // console.log('first');
-    // 질문입력 redirect
-    // 질문 입력 여부에 따라 리디렉션할 경로 결정
 
-    // 사용자의 트리 ID를 가져옴
     const treeId = await authKakao.userTreeFind(authUser.uid);
 
     // 질문 입력 여부에 따라 리디렉션할 경로 결정
@@ -93,11 +79,14 @@ oauthRouter.get('/naver', async (req, res) => {
     const accessToken = jwt.sign({ uid: authUser.uid }, jwtSecretKey, {
       expiresIn: '24h'
     });
-    console.log(userCheck);
+    const treeId = await authNaver.userTreeFind(authUser.uid);
+
+    // 질문 입력 여부에 따라 리디렉션할 경로 결정
+    const redirectPath = userCheck ? `/host/tree/${treeId}` : '/host/question';
     return res
       .cookie('accessToken', accessToken, { httpOnly: true })
-      .cookie('naverToken', response.access_token)
-      .redirect(frontendUrl);
+      .cookie('naverToken', response.access_token, { httpOnly: true })
+      .redirect(frontendUrl + redirectPath);
   } catch (error) {
     res.status(500).json({ message: '네이버 로그인에 실패하였습니다.' });
     throw new Error(error);
