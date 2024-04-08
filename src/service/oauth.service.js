@@ -82,22 +82,22 @@ export default class OAuthService {
     };
     const userRef = db.collection('users').doc(`${this.provider}:${user.id}`);
 
-    const existingUser = await auth.getUser(properties.uid);
-
-    // 유저가 있다면 update
-    if (existingUser) {
+    try {
       const [, authResult] = await Promise.all([
         userRef.set(properties),
         auth.updateUser(properties.uid, properties)
       ]);
       return authResult;
+    } catch (error) {
+      if (error.code === 'auth/user-not-found') {
+        const [, authResult] = await Promise.all([
+          userRef.set(properties),
+          auth.createUser(properties)
+        ]);
+        return authResult;
+      }
+      throw error;
     }
-    // 유저가 없다면 create
-    const [, authResult] = await Promise.all([
-      userRef.set(properties),
-      auth.createUser(properties)
-    ]);
-    return authResult;
   }
 
   /**
