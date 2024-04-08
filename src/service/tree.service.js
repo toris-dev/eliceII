@@ -6,7 +6,7 @@ export default class TreeService {
    *
    * @param {string} uid - 사용자 고유번호
    * @param {string} name - 사용자 이름
-   * @returns {Promise<{message: string, treeId: string}>|{error: string, tree: {uid: string}}>}
+   * @returns {Promise<{create_at: Date, name: string,treeId: string, treeImage:string,uid: string}>|{error: string, tree: {uid: string}}>}
    */
   async createTree(uid, name) {
     const treeSnapshot = await db
@@ -32,9 +32,29 @@ export default class TreeService {
       treeImage: ''
     });
 
-    return {
-      message: '트리가 생성되었습니다.',
-      treeId: id
-    };
+    return (await treeRef.get()).data();
+  }
+
+  /**
+   *
+   * @param {string} uid user에 uid값
+   * @param {Array<string>} message 질문에 대한 응답값
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async createQuestion(uid, questions) {
+    try {
+      const querySnapshot = await db
+        .collection('tree')
+        .where('uid', '==', uid)
+        .get();
+      const docRef = querySnapshot.docs[0].ref;
+      await docRef.update({
+        question: questions
+      });
+      return (await docRef.get()).data();
+    } catch (error) {
+      console.error('질문 생성 오류', error);
+      throw new Error(error);
+    }
   }
 }
