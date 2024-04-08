@@ -48,7 +48,7 @@ oauthRouter.get('/kakao', async (req, res) => {
       .redirect(frontendUrl + redirectPath);
   } catch (error) {
     console.error('Error occurred:', error);
-    return res.status(500).json({ message: error });
+    return res.status(500).json({ message: '카카오 로그인에 실패했습니다.' });
   }
 });
 
