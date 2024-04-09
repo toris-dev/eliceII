@@ -8,13 +8,13 @@ const treeService = new TreeService();
 // 질문 생성 후 트리 생성 , 기존에 트리가 있는지 검사 O
 treeRouter.post('/add', verifyAuthToken, async (req, res) => {
   try {
-    const { uid, name } = req.user;
+    const { uid } = req.user;
     const questions = req.body;
     console.log(questions);
     if (questions.length === 0) {
       return res.status(403).json({ message: '질문을 등록해주세요' });
     }
-    const treeData = await treeService.createTree(uid, name);
+    const treeData = await treeService.createTree(uid);
     if (treeData?.error) {
       // 트리가 존재한다면 return
       return res.status(401).json(treeData);

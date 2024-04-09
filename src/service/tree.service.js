@@ -5,10 +5,9 @@ export default class TreeService {
   /**
    *
    * @param {string} uid - 사용자 고유번호
-   * @param {string} name - 사용자 이름
    * @returns {Promise<{create_at: Date, name: string,treeId: string, treeImage:string,uid: string}>|{error: string, tree: {uid: string}}>}
    */
-  async createTree(uid, name) {
+  async createTree(uid) {
     const treeSnapshot = await db
       .collection('tree')
       .where('uid', '==', uid)
@@ -27,7 +26,6 @@ export default class TreeService {
     treeRef.set({
       treeId: id,
       uid,
-      name,
       created_at: new Date(),
       treeImage: ''
     });

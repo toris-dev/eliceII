@@ -70,18 +70,17 @@ export default class OAuthService {
     }
   }
 
+  // 유저의 이름 저장 x
   async updateOrCreateUser(user, refreshToken) {
     const properties = {
       uid: `${this.provider}:${user.id}`,
       provider: `oidc.${this.provider}`,
-      displayName:
-        user.kakao_account?.profile?.nickname ?? user?.name ?? 'null',
       email: user.kakao_account?.email ?? user?.email ?? 'example@example.com',
       created_at: new Date(),
       refreshToken
     };
     const userRef = db.collection('users').doc(`${this.provider}:${user.id}`);
-
+    console.log(user);
     try {
       const [, authResult] = await Promise.all([
         userRef.set(properties),
@@ -100,20 +99,21 @@ export default class OAuthService {
     }
   }
 
-  /**
-   * @param {string} uid 소셜로그인 uid값
-   * @returns {Promise<boolean>} 존재하지 않으면 false 존재하면 true
-   */
-  async userCheck(uid) {
-    const user = await db
-      .collection('users')
-      .where('uid', '==', `${this.provider}:${uid}`)
-      .get();
-    if (user.empty) {
-      return false;
-    }
-    return true;
-  }
+  // /**
+  //  * @param {string} uid 소셜로그인 uid값
+  //  * @returns {Promise<boolean>} 존재하지 않으면 false 존재하면 true
+  //  */
+  // async userCheck(uid) {
+  //   const user = await db
+  //     .collection('users')
+  //     .where('uid', '==', `${this.provider}:${uid}`)
+  //     .where('question', '==', [])
+  //     .get();
+  //   if (user.empty) {
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   async userTreeFind(uid) {
     try {
@@ -125,9 +125,9 @@ export default class OAuthService {
         return snapshot.docs[0].id; // 첫 번째 문서의 트리 ID 반환
       }
       // 트리가 없을 경우에 대한 처리 추가 가능
-      return '';
+      return null;
     } catch (error) {
-      return '';
+      return null;
     }
   }
   // refreshAccessToken 관리를 어떻게?
