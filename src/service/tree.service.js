@@ -23,11 +23,12 @@ export default class TreeService {
     const id = uuidv4().replace(/-/g, '');
     const treeRef = db.collection('tree').doc(id);
 
-    treeRef.set({
+    await treeRef.set({
       treeId: id,
       uid,
       created_at: new Date(),
-      treeImage: ''
+      treeImage: '',
+      count: 0
     });
 
     return (await treeRef.get()).data();

@@ -11,7 +11,7 @@ treeRouter.post('/add', verifyAuthToken, async (req, res) => {
     const { uid } = req.user;
     const questions = req.body;
     console.log(questions);
-    if (questions.length === 0) {
+    if (!Array.isArray(questions) && questions.length === 0) {
       return res.status(403).json({ message: '질문을 등록해주세요' });
     }
     const treeData = await treeService.createTree(uid);
