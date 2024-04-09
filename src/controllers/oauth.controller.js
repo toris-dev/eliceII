@@ -42,10 +42,11 @@ oauthRouter.get('/kakao', async (req, res) => {
     return res
       .cookie('accessToken', accessToken, { httpOnly: true })
       .cookie('kakaoToken', token, { httpOnly: true })
+      .status(200)
       .json({ treeId });
   } catch (error) {
     console.error('Error occurred:', error);
-    return res.status(500).json({ message: '카카오 로그인에 실패했습니다.' });
+    return res.status(500).json({ error: '로그인 실패' });
   }
 });
 
