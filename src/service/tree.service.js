@@ -47,9 +47,7 @@ export default class TreeService {
         .where('uid', '==', uid)
         .get();
       const docRef = querySnapshot.docs[0].ref;
-      await docRef.update({
-        question: questions
-      });
+      await docRef.update({ questions });
       return (await docRef.get()).data();
     } catch (error) {
       console.error('질문 생성 오류', error);

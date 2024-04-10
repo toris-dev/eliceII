@@ -53,7 +53,11 @@ export default class OAuthService {
       const res = await axios.post(tokenUrl, new URLSearchParams(body));
       return res.data;
     } catch (error) {
-      throw new Error('토큰 요청 Error: ', error);
+      console.error(
+        '토큰 요청 Error:',
+        error.response ? error.response.data : error.message
+      );
+      throw new Error('토큰 요청 에러');
     }
   }
 
@@ -66,7 +70,10 @@ export default class OAuthService {
       });
       return res.data;
     } catch (error) {
-      throw new Error('유저정보 요청 error: ', error);
+      console.error(
+        '유저정보 요청 Error:',
+        error.response ? error.response.data : error.message
+      );
     }
   }
 
@@ -75,12 +82,11 @@ export default class OAuthService {
     const properties = {
       uid: `${this.provider}:${user.id}`,
       provider: `oidc.${this.provider}`,
-      email: user.kakao_account?.email ?? user?.email ?? 'example@example.com',
       created_at: new Date(),
+      email: user.kakao_account?.email ?? `${user.id}@naver.com`,
       refreshToken
     };
     const userRef = db.collection('users').doc(`${this.provider}:${user.id}`);
-    console.log(user);
     try {
       const [, authResult] = await Promise.all([
         userRef.set(properties),
@@ -95,25 +101,9 @@ export default class OAuthService {
         ]);
         return authResult;
       }
-      throw error;
+      throw new Error(error);
     }
   }
-
-  // /**
-  //  * @param {string} uid 소셜로그인 uid값
-  //  * @returns {Promise<boolean>} 존재하지 않으면 false 존재하면 true
-  //  */
-  // async userCheck(uid) {
-  //   const user = await db
-  //     .collection('users')
-  //     .where('uid', '==', `${this.provider}:${uid}`)
-  //     .where('question', '==', [])
-  //     .get();
-  //   if (user.empty) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
 
   async userTreeFind(uid) {
     try {
@@ -127,9 +117,11 @@ export default class OAuthService {
       // 트리가 없을 경우에 대한 처리 추가 가능
       return null;
     } catch (error) {
-      return null;
+      console.error('유저 트리 조회 에러:', error.message);
+      throw new Error('유저 트리 조회 에러');
     }
   }
+
   // refreshAccessToken 관리를 어떻게?
   // async refreshAccessToken(refreshToken) {
   //   try {
@@ -150,5 +142,21 @@ export default class OAuthService {
   //     console.error('Error refreshing access token:', error);
   //     throw error;
   //   }
+  // }
+
+  // /**
+  //  * @param {string} uid 소셜로그인 uid값
+  //  * @returns {Promise<boolean>} 존재하지 않으면 false 존재하면 true
+  //  */
+  // async userCheck(uid) {
+  //   const user = await db
+  //     .collection('users')
+  //     .where('uid', '==', `${this.provider}:${uid}`)
+  //     .where('question', '==', [])
+  //     .get();
+  //   if (user.empty) {
+  //     return false;
+  //   }
+  //   return true;
   // }
 }

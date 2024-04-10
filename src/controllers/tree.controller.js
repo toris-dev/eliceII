@@ -23,6 +23,7 @@ treeRouter.post('/add', verifyAuthToken, async (req, res) => {
 
     res.status(200).json({ message: '트리가 생성되었습니다.', treeData });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: '트리가 생성되지 않았습니다.'
     });

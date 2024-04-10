@@ -20,18 +20,10 @@ oauthRouter.get('/kakao', async (req, res) => {
     const response = await authKakao.getToken(code);
     const token = response.access_token;
     const kakaoUser = await authKakao.getUser(token);
-
-    let authUser;
-    try {
-      authUser = await authKakao.updateOrCreateUser(
-        kakaoUser,
-        response.refresh_token
-      );
-    } catch (updateOrCreateError) {
-      console.error('Error updating or creating user:', updateOrCreateError);
-      throw new Error('유저 업데이트 또는 생성 에러');
-    }
-    // jwt 생성
+    const authUser = await authKakao.updateOrCreateUser(
+      kakaoUser,
+      response.refresh_token
+    );
     const accessToken = jwt.sign({ uid: authUser.uid }, jwtSecretKey, {
       expiresIn: '24h'
     });
@@ -63,16 +55,10 @@ oauthRouter.get('/naver', async (req, res) => {
     const response = await authNaver.getToken(code); // 네이버 OAuth를 통해 액세스 토큰을 받아옴
     const naverUser = await authNaver.getUser(response.access_token); // 액세스 토큰을 사용하여 네이버 사용자 정보를 가져옴
     // 이후에 필요한 처리를 수행하고 클라이언트에게 응답을 보냄
-    let authUser;
-    try {
-      authUser = await authNaver.updateOrCreateUser(
-        naverUser.response,
-        response.refresh_token
-      );
-    } catch (updateOrCreateError) {
-      console.error('Error updating or creating user:', updateOrCreateError);
-      throw new Error(updateOrCreateError);
-    }
+    const authUser = await authNaver.updateOrCreateUser(
+      naverUser.response,
+      response.refresh_token
+    );
     const accessToken = jwt.sign({ uid: authUser.uid }, jwtSecretKey, {
       expiresIn: '24h'
     });
@@ -84,7 +70,7 @@ oauthRouter.get('/naver', async (req, res) => {
       .cookie('naverToken', response.access_token, { httpOnly: true })
       .json({ treeId });
   } catch (error) {
-    res.status(500).json({ message: '네이버 로그인에 실패하였습니다.' });
-    throw new Error(error);
+    console.error(error);
+    return res.status(500).json({ error: '로그인 실패' });
   }
 });
