@@ -7,7 +7,8 @@
     "dev": "nodemon --exec babel-node ./src/app.js",
     "build": "babel src -d dist",
     "start": "node ./dist/app.js",
-    "deploy": "pm2 start ecosystem.config.js"
+    "deploy": "pm2 start ecosystem.config.js",
+    "test": "node --test -r @babel/register"
   },
   "license": "MIT",
   "dependencies": {
@@ -27,11 +28,14 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.24.1",
+    "@babel/plugin-transform-modules-commonjs": "^7.24.1",
     "@babel/preset-env": "^7.24.3",
+    "babel-plugin-add-module-exports": "^1.0.4",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "supertest": "^6.3.4"
   }
 }
