@@ -11,7 +11,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api', router);
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log('Server Running✔️');
 });
-export default app;
+export default server;

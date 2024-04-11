@@ -13,9 +13,21 @@ const verifyAuthToken = async (req, res, next) => {
     }
 
     // 토큰 검증 및 디코딩
-    const decoded = verify(accessToken, jwtSecretKey, {
-      ignoreExpiration: false
-    });
+    const decoded = verify(
+      accessToken,
+      jwtSecretKey,
+      {
+        ignoreExpiration: false
+      },
+      (err, decode) => {
+        if (err) {
+          console.error('Error verifying auth token:', err);
+          return res.status(500).json({ message: '토큰 에러' });
+        }
+        console.log('Decoded token:', decode); // 해석된 토큰 내용 출력
+        return decode;
+      }
+    );
 
     const { uid } = decoded;
     const user = await auth.getUser(uid);

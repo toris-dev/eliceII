@@ -39,7 +39,6 @@ export default class TreeService {
    * @param {string} uid user에 uid값
    * @param {Array<string>} message 질문에 대한 응답값
    */
-  // eslint-disable-next-line class-methods-use-this
   async createQuestion(uid, questions) {
     try {
       const querySnapshot = await db
