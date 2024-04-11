@@ -1,4 +1,5 @@
 import firebase from 'firebase-admin';
+import { getDownloadURL } from 'firebase-admin/storage';
 import { db, storage } from '../utils/firebase';
 
 export default class MessageService {
@@ -89,12 +90,11 @@ export default class MessageService {
     const [files] = await storage.bucket().getFiles({
       prefix: 'icons/'
     });
-    const iconUrlsPromises = files.map((file) =>
-      file.getSignedUrl({
-        action: 'read',
-        expires: '03-17-2025' // 만료 시간
-      })
-    );
+
+    const iconUrlsPromises = files.map(async (file) => {
+      const urls = await getDownloadURL(file);
+      return urls;
+    });
 
     const iconUrlsArray = await Promise.all(iconUrlsPromises);
     const flattenedUrls = iconUrlsArray
@@ -113,7 +113,6 @@ export default class MessageService {
   async findAll(treeId, count) {
     const pageSize = 11; // 한 페이지에 표시할 메시지 수
     const startAfterDoc = (count - 1) * pageSize; // 시작점 계산
-
     let query = db
       .collection('messages')
       .where('treeId', '==', treeId)
