@@ -23,7 +23,7 @@ describe('메시지 API 테스트', () => {
       )
       .send({
         message: 'Hello',
-        icon: 'https://storage.googleapis.com/eliceii.appspot.com/icons/free-icon-angry-face-11052399.png?GoogleAccessId=firebase-adminsdk-uay5h%40eliceii.iam.gserviceaccount.com&Expires=1742169600&Signature=g%2F0EI36kIf8%2BRV5mlM9pY72Gz87OzxHl%2FoOEuTR4HkL1lzVWpYH6BVPMSenxgO9VsinmLWDCkS1rleXYXi%2BzAB%2B8UunGl%2B9zrKX58hfyPwdORPrI2%2FundriVW0LwHUOdq9DF4U9Qv%2BdfdGhUl%2F6YYRjbTSa58uIMju0PL4xNdBVfweqWHDwBN1E64xKPwsSr%2FbkGaFMKf%2FFUpcza%2F%2BANnd%2FUy6S%2B%2BEK5Ma744sjVlEqvPa0fmud%2BynmX5nkJtwfQbLEGg4IusDSjTfvpx3Ui04qRi8Bkcn6kTtVTOS7fvAKNbmKzJNtIJRfXwbqYt3qlVKrvtB2voT4jSZvMDb4qyw%3D%3D',
+        icon: 'https://firebasestorage.googleapis.com/v0/b/eliceii.appspot.com/o/icons%2Fbear.gltf?alt=media&token=69d646fe-8277-4f41-8a7a-a6b3bd6aa8b7',
         coordinate: { x: 0, y: 0 }
       });
 
