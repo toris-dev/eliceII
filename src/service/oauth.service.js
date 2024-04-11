@@ -105,6 +105,7 @@ export default class OAuthService {
     }
   }
 
+  // 사용자 트리 찾기
   async userTreeFind(uid) {
     try {
       const snapshot = await db
@@ -122,41 +123,53 @@ export default class OAuthService {
     }
   }
 
-  // refreshAccessToken 관리를 어떻게?
-  // async refreshAccessToken(refreshToken) {
-  //   try {
-  //     const config = {
-  //       headers: {
-  //         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-  //       }
-  //     };
+  // 유저 삭제 시 tree, message 삭제
+  async deleteUser(uid) {
+    const batch = db.batch();
 
-  //     const params = new URLSearchParams();
-  //     params.append('grant_type', 'refresh_token');
-  //     params.append('client_id', kakaoClientId);
-  //     params.append('refresh_token', refreshToken);
+    try {
+      // 1. Firestore의 users 컬렉션에서 사용자 데이터 삭제
+      const userDocRef = db.collection('users').doc(uid);
+      batch.delete(userDocRef);
 
-  //     const response = await axios.post(kakaoTokenUrl, params, config);
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error('Error refreshing access token:', error);
-  //     throw error;
-  //   }
-  // }
+      // 2. tree 컬렉션에서 해당 사용자의 uid를 가진 문서를 찾아 삭제
+      const treeSnapshot = await db
+        .collection('tree')
+        .where('uid', '==', uid)
+        .get();
+      treeSnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
 
-  // /**
-  //  * @param {string} uid 소셜로그인 uid값
-  //  * @returns {Promise<boolean>} 존재하지 않으면 false 존재하면 true
-  //  */
-  // async userCheck(uid) {
-  //   const user = await db
-  //     .collection('users')
-  //     .where('uid', '==', `${this.provider}:${uid}`)
-  //     .where('question', '==', [])
-  //     .get();
-  //   if (user.empty) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
+      // 3. message 컬렉션에서 해당 treeId를 가진 문서도 삭제
+      const deletePromises = [];
+      treeSnapshot.forEach(async (treeDoc) => {
+        const { treeId } = treeDoc.data();
+        console.log(treeId);
+        const messageSnapshot = await db
+          .collection('messages')
+          .where('treeId', '==', treeId)
+          .get();
+        messageSnapshot.forEach((doc) => {
+          deletePromises.push(batch.delete(doc.ref));
+        });
+      });
+
+      // 모든 삭제 작업을 비동기로 실행
+      await Promise.all(deletePromises);
+
+      // 4. Firebase Authentication에서 사용자 삭제
+      await auth.deleteUser(uid);
+
+      // 모든 변경 사항을 적용
+      await batch.commit();
+
+      return '사용자 데이터가 성공적으로 삭제되었습니다.';
+    } catch (error) {
+      console.error('사용자 데이터 삭제 오류:', error);
+      // 에러 발생 시 롤백
+      await batch.rollback();
+      throw new Error('사용자 데이터를 삭제하지 못했습니다.');
+    }
+  }
 }

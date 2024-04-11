@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import { jwtSecretKey } from '../constant/env';
+import verifyAuthToken from '../middleware/oauth.middleware';
 import OAuthService from '../service/oauth.service';
 
 export const oauthRouter = Router();
@@ -72,5 +73,16 @@ oauthRouter.get('/naver', async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: '로그인 실패' });
+  }
+});
+
+oauthRouter.delete('/user/delete', verifyAuthToken, async (req, res) => {
+  const { uid } = req.user;
+  try {
+    const message = await authKakao.deleteUser(uid);
+    res.status(200).json({ message });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error });
   }
 });
