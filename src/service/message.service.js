@@ -1,5 +1,6 @@
 import firebase from 'firebase-admin';
 import { getDownloadURL } from 'firebase-admin/storage';
+import uuid4 from 'uuid4';
 import { db, storage } from '../utils/firebase';
 
 export default class MessageService {
@@ -100,7 +101,8 @@ export default class MessageService {
     const flattenedUrls = iconUrlsArray
       .flat()
       .slice(1)
-      .map((urlArr) => urlArr.toString());
+      .map((urlArr) => ({ key: uuid4, url: urlArr.toString() }));
+
     return flattenedUrls;
   }
 
