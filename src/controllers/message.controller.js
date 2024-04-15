@@ -90,8 +90,8 @@ messageRouter.get('/icon/all', async (req, res) => {
 messageRouter.get('/:treeId/all', async (req, res) => {
   try {
     const { treeId } = req.params;
-    const { count } = req.query;
-    const messages = await messageService.findAll(treeId, count); // 페이지네이션 11개씩
+    const { count, size } = req.query;
+    const messages = await messageService.findAll(treeId, count, size); // 페이지네이션 11개씩
 
     res.json(messages);
   } catch (error) {
