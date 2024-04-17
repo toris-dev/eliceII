@@ -11,9 +11,11 @@ treeRouter.post('/add', verifyAuthToken, async (req, res) => {
     const { uid } = req.user;
     const questions = req.body;
     console.log(questions);
-    if (!Array.isArray(questions) || questions.length === 0) {
+    // 객체가 비어있는지 확인
+    if (Object.keys(questions).length === 0) {
       return res.status(403).json({ message: '질문을 등록해주세요' });
     }
+
     const treeData = await treeService.createTree(uid);
     if (treeData?.error) {
       // 트리가 존재한다면 return
