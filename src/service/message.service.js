@@ -119,7 +119,7 @@ export default class MessageService {
       .collection('messages')
       .where('treeId', '==', treeId)
       .orderBy('created_at', 'desc')
-      .limit(size);
+      .limit(Number(size));
 
     if (count > 1) {
       const lastPageQuery = await db
