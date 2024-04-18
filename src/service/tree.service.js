@@ -73,4 +73,25 @@ export default class TreeService {
       throw new Error(error);
     }
   }
+
+  async treeIdCheck(treeId) {
+    try {
+      const questionInfo = await db
+        .collection('tree')
+        .where('treeId', '==', treeId)
+        .get();
+
+      if (questionInfo.empty) {
+        return {
+          message: '트리가 없습니다.'
+        };
+      }
+      const { uid } = questionInfo.docs[0].data();
+      console.log(uid);
+      return uid;
+    } catch (error) {
+      console.error('트리가 없습니다.', error);
+      throw new Error(error);
+    }
+  }
 }

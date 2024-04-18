@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import verifyAuthToken from '../middleware/oauth.middleware';
-import TreeService from '../service/tree.service';
+import { treeService } from '../service';
 
 export const treeRouter = Router();
-const treeService = new TreeService();
 
 // 질문 생성 후 트리 생성 , 기존에 트리가 있는지 검사 O
 treeRouter.post('/add', verifyAuthToken, async (req, res) => {
