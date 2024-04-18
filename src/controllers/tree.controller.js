@@ -31,3 +31,17 @@ treeRouter.post('/add', verifyAuthToken, async (req, res) => {
     });
   }
 });
+
+// 트리 정보
+treeRouter.get('/info', async (req, res) => {
+  try {
+    const { treeId } = req.query;
+    if (!treeId) {
+      res.status(400).json({ message: 'treeId가 없습니다.' });
+    }
+    const treeInfo = await treeService.infoQuestion(treeId);
+    res.status(200).json(treeInfo);
+  } catch (error) {
+    res.status(404).json({ message: '트리 정보가 없습니다.' });
+  }
+});
