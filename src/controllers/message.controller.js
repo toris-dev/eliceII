@@ -91,7 +91,7 @@ messageRouter.get('/icon/all', async (req, res) => {
   }
 });
 
-// 트리 메시지 전체 받아오기 O
+// host 트리 메시지 전체 받아오기 O
 messageRouter.get('/:treeId/all', verifyAuthToken, async (req, res) => {
   try {
     const { treeId } = req.params;
@@ -104,6 +104,28 @@ messageRouter.get('/:treeId/all', verifyAuthToken, async (req, res) => {
     const messages = await messageService.findAll(treeId, count, size); // 페이지네이션 11개씩
 
     res.json(messages);
+  } catch (error) {
+    console.error('Error:', error);
+    return res
+      .status(500)
+      .json({ message: '메시지를 가져오지 못했습니다.', error: error.message });
+  }
+});
+
+// Guest 트리 메시지 전체 받아오기 O
+messageRouter.get('/:treeId/guestAll', async (req, res) => {
+  try {
+    const { treeId } = req.params;
+    const { count, size } = req.query;
+    if (!treeId || !count || !size) {
+      res.status(404).json({ message: '몇개의 데이터를 가져올지 입력하세요' });
+    }
+    const messages = await messageService.findAll(treeId, count, size); // 페이지네이션 11개씩
+    const iconsAndCoordinates = messages.map((msg) => ({
+      icon: msg.icon,
+      coordinate: msg.coordinate
+    }));
+    res.json(iconsAndCoordinates);
   } catch (error) {
     console.error('Error:', error);
     return res
